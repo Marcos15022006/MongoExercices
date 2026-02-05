@@ -1,0 +1,126 @@
+
+use tienda
+
+
+
+// 1.Insertar 2 clientes y 3 pedidos.
+db.clientes.insertMany([
+  {
+    idCliente: 1,
+    nombre: "Juan Pérez",
+    emails: ["juan.perez@email.com", "juan.p@gmail.com"],
+    direcciones: [
+      { calle: "Calle Mayor 123", ciudad: "Madrid", codigoPostal: "28001" },
+      { calle: "Avenida Sol 45", ciudad: "Barcelona", codigoPostal: "08001" }
+    ]
+  },
+  {
+    idCliente: 2,
+    nombre: "María García",
+    emails: ["maria.garcia@email.com", "m.garcia@hotmail.com"],
+    direcciones: [
+      { calle: "Plaza España 10", ciudad: "Valencia", codigoPostal: "46001" }
+    ]
+  }
+])
+
+// Insertar pedidos
+db.pedidos.insertMany([
+  {
+    idPedido: 1,
+    idCliente: 1,
+    fecha: new Date("2024-01-15"),
+    lineas: [
+      { sku: "SKU001", nombre: "Portatil", cantidad: 2, precio: 899.99 },
+      { sku: "SKU002", nombre: "Raton", cantidad: 150, precio: 15.50 }
+    ],
+    estado: "pendiente"
+  },
+  {
+    idPedido: 2,
+    idCliente: 1,
+    fecha: new Date("2024-02-20"),
+    lineas: [
+      { sku: "SKU003", nombre: "Teclado", cantidad: 50, precio: 45.00 },
+      { sku: "SKU004", nombre: "Monitor", cantidad: 3, precio: 250.00 }
+    ],
+    estado: "enviado"
+  },
+  {
+    idPedido: 3,
+    idCliente: 2,
+    fecha: new Date("2024-03-10"),
+    lineas: [
+      { sku: "SKU005", nombre: "Impresora", cantidad: 120, precio: 180.00 },
+      { sku: "SKU006", nombre: "Tostadora", cantidad: 200, precio: 8.99 }
+    ],
+    estado: "pendiente"
+  }
+])
+
+
+
+// 2.Pedidos de un cliente por idCliente.
+db.pedidos.find({ idCliente: 1 })
+
+
+// 3. Pedidos con cantidad > 100
+
+
+db.pedidos.find({ "lineas.cantidad": { $gt: 100 } })
+
+db.pedidos.aggregate([
+  {$unwind:"$lineas"},
+  {$match:{"lineas.cantidad: { $gt :100}}},
+  { $project:{
+    _id:0,
+    idPedido:1,
+    idCliente:1,
+    fecha:1,
+    estado:1,
+    linea:"$lineas"}}
+])
+
+db.pedidos.aggregate([
+  {
+    $project: {
+      _id:0,
+      idPedido: 1,
+      idCliente: 1,
+      fecha: 1,
+      estado: 1,
+      contidadTotal:{$sum:"$lineas.cantidad"}
+    }
+  },
+  {
+    $match:{
+      cantidadTotal: { $gt:100}
+    }
+  }
+])
+
+
+// 4. Cambiar el estado de un pedido
+
+
+db.pedidos.updateOne(
+  { idPedido: 1 },
+  { $set: { estado: "completado" } }
+)
+
+db.pedidos.find({ idPedido: 1 })
+
+
+// 5. Cambiar el email principal de un cliente
+
+
+db.clientes.updateOne(
+  { idCliente: 1 },
+  { $set: { "emails.0": "nuevo@email.com" } }
+)
+
+// Verificar el cambio
+
+db.clientes.find({ idCliente: 1 })
+
+

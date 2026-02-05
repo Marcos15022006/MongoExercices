@@ -1,0 +1,66 @@
+use domotica
+
+db.createCollection("mediciones")
+
+Ejercicio 1
+db.mediciones.insertMany([
+    {
+        sensorId: 1,
+        ts: new Date("2026-01-22T10:30:00Z"),
+        tipo: "temp",
+        valor: 22.5,
+        ubicacion: "Santiago de Compostela"
+    },
+    {
+        sensorId: 2,
+        ts: new Date("2026-01-21T15:45:00Z"),
+        tipo: "temp",
+        valor: -5,
+        ubicacion: "Santiago de Compostela"
+    },
+    {
+        sensorId: 3,
+        ts: new Date("2026-01-20T08:20:00Z"),
+        tipo: "hum",
+        valor: 65.3,
+        ubicacion: "A Coruña"
+    }
+])
+
+
+
+Ejercicio 2
+
+
+db.mediciones.find({
+    sensorId: 1,
+    ts: { $gte:  Date().now() - 24*60*60*1000 }
+})
+
+
+
+Ejercicio 3
+
+db.mediciones.find({
+    valor: { $gt: 60 }
+})
+
+
+Ejercicio 4
+
+db.mediciones.updateMany(
+    { valor: { $lt: 0 } },
+    { 
+        $set: { valor: 0} 
+    }
+)
+
+db.mediciones.find({
+    sensorId: 4 
+})
+
+Ejercicio 5
+
+db.mediciones.deleteMany({
+    ts: { $lt: new Date("2026-01-01T00:00:00Z") }
+})
