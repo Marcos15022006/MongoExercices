@@ -56,7 +56,7 @@ public class PartidaController {
     }
 
     // 3. Partida máis curta por xogo
-    public List<Document> partidaMaisCurtaPorXogo() {
+    public List<Document> partidaMaisCurta() {
         List<Document> sal = new ArrayList<>();
         try (MongoProvider provider = new MongoProvider()) {
             MongoCollection<Document> col = provider.partidas();
@@ -87,7 +87,7 @@ public class PartidaController {
     }
 
     // 5. Listaxe simplificada de partidas
-    public List<Document> listaxeSimplificadaDePartidas() {
+    public List<Document> listaxeSimplificada() {
         List<Document> sal = new ArrayList<>();
         try (MongoProvider provider = new MongoProvider()) {
             MongoCollection<Document> col = provider.partidas();
@@ -128,7 +128,7 @@ public class PartidaController {
         try (MongoProvider provider = new MongoProvider()) {
             MongoCollection<Document> col = provider.partidas();
             col.aggregate(List.of(
-                Aggregates.group("$Xogo", 
+                Aggregates.group("$Xogo",
                     Accumulators.avg("puntuacion_media", "$Puntuacion")),
                 Aggregates.sort(Sorts.descending("puntuacion_media"))
             )).into(sal);

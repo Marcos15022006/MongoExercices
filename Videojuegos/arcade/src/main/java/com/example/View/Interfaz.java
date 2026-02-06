@@ -27,9 +27,10 @@ public class Interfaz {
         for (Document doc : resultados2) {
             System.out.println("Xogador: " + doc.get("_id") + ", Mellor puntuación: " + doc.get("mellor_puntuacion"));
         }
+        System.out.println("===================================================");
 
         
-        List<Document> resultados3 = partidasController.partidaMaisCurtaPorXogo();
+        List<Document> resultados3 = partidasController.partidaMaisCurta();
         System.out.println("\n=== 3. Partida máis curta por xogo ===");
         for (Document doc : resultados3) {
             System.out.println("Xogo: " + doc.get("_id") + ", Duración mínima: " + doc.get("duracion_minima") + " min");
@@ -47,7 +48,7 @@ public class Interfaz {
         System.out.println("===================================================");
 
         
-        List<Document> resultados5 = partidasController.listaxeSimplificadaDePartidas();
+        List<Document> resultados5 = partidasController.listaxeSimplificada();
         System.out.println("\n=== 5. Listaxe simplificada de partidas ===");
         for (Document doc : resultados5) {
             System.out.println("Xogador: " + doc.get("Xogador") + ", Xogo: " + doc.get("Xogo") + ", Puntuación: " + doc.get("Puntuacion"));
