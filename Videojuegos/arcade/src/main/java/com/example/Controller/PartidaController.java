@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bson.Document;
+import org.bson.conversions.Bson;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Aggregates;
@@ -104,6 +105,23 @@ public class PartidaController {
         return sal;
     }
 
+    /*public List<Document> listaxepartsimpl2(){
+        List<Document> sal = new ArrayList<>();
+        try (MongoProvider provider = new MongoProvider()) {
+            MongoCollection<Document> col = provider.partidas();
+            Bson projection = new Document("Xogador", 1)
+            .append("Xogo",1)
+            .append("Puntuacion", 1)
+            .append("_id", 0);
+            col.find().projection(projection).into(sal);
+            } catch (Exception e) {
+            System.err.println("Error al obtener listaxe simplificada de partidas: " + e.getMessage());
+        }
+        return sal;
+
+    }
+    */
+
     // 6. Xogos máis puntuables
     public List<Document> xogosMaisPuntuables() {
         List<Document> sal = new ArrayList<>();
@@ -118,6 +136,66 @@ public class PartidaController {
             System.err.println("Error al obtener xogos máis puntuables: " + e.getMessage());
         }
         return sal;
+    }
+
+    public void insertarPartidas(){
+        Document d1 = new Document("Xogador", "Mario")
+            .append("Xogo", "Space Invaders")
+            .append("Puntuacion", 1200)
+            .append("Duracion", 15)
+            .append("Nivel", 3);
+        insertarPartida(d1);
+
+        Document d2 = new Document("Xogador", "Luigi")
+            .append("Xogo", "Pac-Man")
+            .append("Puntuacion", 2500)
+            .append("Duracion", 20)
+            .append("Nivel", 5);
+        insertarPartida(d2);
+
+        Document d3 = new Document("Xogador", "Mario")
+            .append("Xogo", "Pac-Man")
+            .append("Puntuacion", 1800)
+            .append("Duracion", 18)
+            .append("Nivel", 4);
+        insertarPartida(d3);
+
+        Document d4 = new Document("Xogador", "Peach")
+            .append("Xogo", "Space Invaders")
+            .append("Puntuacion", 3000)
+            .append("Duracion", 25)
+            .append("Nivel", 6);
+        insertarPartida(d4);
+
+        Document d5 = new Document("Xogador", "Luigi")
+            .append("Xogo", "Donkey Kong")
+            .append("Puntuacion", 1500)
+            .append("Duracion", 12)
+            .append("Nivel", 3);
+        insertarPartida(d5);
+
+        Document d6 = new Document("Xogador", "Mario")
+            .append("Xogo", "Space Invaders")
+            .append("Puntuacion", 2200)
+            .append("Duracion", 22)
+            .append("Nivel", 5);
+        insertarPartida(d6);
+
+        Document d7 = new Document("Xogador", "Peach")
+            .append("Xogo", "Pac-Man")
+            .append("Puntuacion", 2800)
+            .append("Duracion", 10)
+            .append("Nivel", 6);
+        insertarPartida(d7);
+
+        Document d8 = new Document("Xogador", "Yoshi")
+            .append("Xogo", "Donkey Kong")
+            .append("Puntuacion", 1100)
+            .append("Duracion", 8)
+            .append("Nivel", 2);
+        insertarPartida(d8);
+
+        System.out.println("Partidas insertadas correctamente");
     }
 
 }

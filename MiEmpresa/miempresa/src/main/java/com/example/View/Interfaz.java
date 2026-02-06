@@ -1,12 +1,18 @@
 package com.example.View;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
 import com.example.Controller.EmpleadoController;
+import com.example.Controller.MongoProvider;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Accumulators;
+import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Sorts;
 import com.mongodb.client.model.Updates;
 
 public class Interfaz {
@@ -27,25 +33,6 @@ public class Interfaz {
         System.out.println("------------------------------------------------");
 
         // Busca los empleados del departamento 10 y 20
-        /*filtro = Filters.eq("dep", 10);
-        System.out.println("Empleados del departamento 10 ");
-        System.out.println("------------------------------------------------");
-        for (Document doc : empleadosDep10) {
-            System.out.println(doc);
-        }
-        System.out.println("------------------------------------------------");
-        
-        filtro = Filters.eq("dep", 20);
-        List<Document> empleadosDep20 = empleadosController.buscarEmpleado(filtro);
-        System.out.println("------------------------------------------------");
-        System.out.println("Empleados del departamento 20 ");
-        for (Document doc : empleadosDep20) {
-            System.out.println(doc);
-        }
-        System.out.println("------------------------------------------------");
-        */
-
-        //Las dos conssultas en una sola.
         Bson filtroDosDeps = Filters.or(Filters.eq("dep", 10), Filters.eq("dep", 20));
         List<Document> empleadosDosDeps = empleadosController.buscarEmpleado(filtroDosDeps);
         System.out.println("------------------------------------------------");
@@ -70,7 +57,7 @@ public class Interfaz {
 
         //Sube el salario de los analistas en 100€, a todos los analistas.
         System.out.println("------------------------------------------------");
-        System.out.println("Subiendo el salario de los analistas en 100€...");
+        System.out.println("Subir el salario de los analistas en 100€");
         System.out.println("------------------------------------------------");
         Bson filtroMod = Filters.eq("oficio", "Analista");
         Bson actualizacion = Updates.inc("salario", 100);
@@ -81,7 +68,7 @@ public class Interfaz {
 
         //Decrementa la comisión existente en 20€.
         System.out.println("------------------------------------------------");
-        System.out.println("Decrementando la comisión existente en 20€...");
+        System.out.println("Decrementa la comisión existente en 20€");
         System.out.println("------------------------------------------------");
         Bson filtroComision = Filters.exists("comisión", true);
         Bson actualizacionComision = Updates.inc("comisión", -20);
@@ -92,7 +79,7 @@ public class Interfaz {
 
         //Visualiza la media de salario.
         System.out.println("------------------------------------------------");
-        System.out.println("Calculando la media de salario...");
+        System.out.println("Calcular media salario");
         System.out.println("------------------------------------------------");
         int sumaSalarios = 0;
         int contadorEmpleados = 0;
@@ -112,42 +99,47 @@ public class Interfaz {
         System.out.println("------------------------------------------------");
         for (int dep = 10; dep <= 30; dep += 10) {
             Bson filtroDep = Filters.eq("dep", dep);
-            int sumaSalariosDep = 0;
-            int maxSalarioDep = 0;
-            int contadorEmpleadosDep = 0;
+            int sumaSal = 0;
+            int maxSal = 0;
+            int contadorEmp = 0;
 
             for (Document doc : empleadosController.buscarEmpleado(filtroDep)) {
                 int salario = doc.getInteger("salario");
-                sumaSalariosDep += salario;
-                if (salario > maxSalarioDep) {
-                    maxSalarioDep = salario;
+                sumaSal += salario;
+                if (salario > maxSal) {
+                    maxSal = salario;
                 }
-                contadorEmpleadosDep++;
+                contadorEmp++;
             }
 
-            int mediaSalarioDep = sumaSalariosDep / contadorEmpleadosDep;
+            int mediaSalarioDep = sumaSal / contadorEmp;
             System.out.println("------------------------------------------------");
-            System.out.println("Departamento "+dep+": Empleados="+contadorEmpleadosDep+", Salario Medio="+mediaSalarioDep+", Máximo Salario="+maxSalarioDep);
+            System.out.println("Departamento "+dep+": Empleados="+contadorEmp+", Salario Medio="+mediaSalarioDep+", Máximo Salario="+maxSal);
             System.out.println("------------------------------------------------");
             
         }
         System.out.println("------------------------------------------------");
 
+
+
+
+        
+
         //Visualiza el nombre del empleado que tiene el máximo salario.
         System.out.println("------------------------------------------------");
-        System.out.println("Empleado con el máximo salario:");
+        System.out.println("Empleado forrado");
         System.out.println("------------------------------------------------");
-        int maxSalario = 0;
-        String nombreMaxSalario = "";
+        int max = 0;
+        String nombreRicachon = "";
         for (Document doc : empleadosController.buscarEmpleado(Filters.empty())) {
             int salario = doc.getInteger("salario");
-            if (salario > maxSalario) {
-                maxSalario = salario;
-                nombreMaxSalario = doc.getString("nombre");
+            if (salario > max) {
+                max = salario;
+                nombreRicachon = doc.getString("nombre");
             }
         }
         System.out.println("------------------------------------------------");
-        System.out.println("Nombre: " + nombreMaxSalario + ", Salario: " + maxSalario);
+        System.out.println("Nombre: " + nombreRicachon + ", Salario: " + max);
         System.out.println("------------------------------------------------");
 
 
@@ -200,4 +192,24 @@ public class Interfaz {
         empleadosController.insertarEmpleado(d5);
     }
 
+    public List<Document> getEmpleado(){
+            List<Document> lista = new ArrayList<>();
+            List<Bson> pipeline = List.of(
+                Aggregates.group("$dep",
+                    Accumulators.sum("numEmpleados",1),
+                    Accumulators.avg("salarioMedio","$salario"),
+                    Accumulators.max("salarioMaximo","$salario")
+                    
+
+                ),
+                Aggregates.sort(Sorts.ascending("dep"))
+            );
+             try (MongoProvider provider = new MongoProvider()) {
+            MongoCollection<Document> col = provider.empleados();
+            col.aggregate(pipeline).into(lista);
+            } catch (Exception e) {
+            System.err.println("Error al buscar un empleado: " + e.getMessage());
+            }
+            return lista;
+        }
 }
